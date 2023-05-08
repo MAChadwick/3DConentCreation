@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\mrtlc\Desktop\Full Sail - 3D Content Creations\Blender Level\ParsingData\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\mrtlc\Desktop\Full Sail - 3D Content Creations\Blender Level\ParsingData\renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\mrtlc\Desktop\Full Sail - 3D Content Creations\Blender Level\ParsingData\FileIntoString.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\mrtlc\Desktop\Full Sail - 3D Content Creations\Blender Level\ParsingData\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <FXCompile Include="C:\Users\mrtlc\Desktop\Full Sail - 3D Content Creations\Blender Level\ParsingData\Shaders\VertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FXCompile>
+    <FXCompile Include="C:\Users\mrtlc\Desktop\Full Sail - 3D Content Creations\Blender Level\ParsingData\Shaders\PixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FXCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{6380E6A7-BC76-3FFE-ADCD-7B8C7BE121EE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{58E82C4D-8AF3-3AF3-B40E-69F1418A9567}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{1E9B1C43-84C2-3BDC-96EC-0B080798C1DA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

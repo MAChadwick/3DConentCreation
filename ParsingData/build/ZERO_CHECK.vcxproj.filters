@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\mrtlc\Desktop\Full Sail - 3D Content Creations\Blender Level\ParsingData\build\CMakeFiles\2ab407b7786435dc54d24dbca310bb48\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{DBD6FF58-6308-32D7-BFDB-A1D952756DCF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
