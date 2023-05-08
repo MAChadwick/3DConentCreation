@@ -1,3 +1,0 @@
-C:/Users/mrtlc/Desktop/Full Sail - 3D Content Creations/Blender Level/ParsingData/build/CMakeFiles/Assignment_1_D3D11.dir
-C:/Users/mrtlc/Desktop/Full Sail - 3D Content Creations/Blender Level/ParsingData/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/mrtlc/Desktop/Full Sail - 3D Content Creations/Blender Level/ParsingData/build/CMakeFiles/ZERO_CHECK.dir
