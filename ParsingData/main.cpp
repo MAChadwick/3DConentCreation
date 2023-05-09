@@ -16,6 +16,7 @@
 
 #include "FileIntoString.h"
 #include "renderer.h" // example rendering code (not Gateware code!)
+#include "LevelDataParser.h"
 // open some namespaces to compact the code a bit
 using namespace GW;
 using namespace CORE;
