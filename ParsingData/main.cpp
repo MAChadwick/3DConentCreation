@@ -42,6 +42,9 @@ int main()
 		{
 			win.SetWindowName("Matthew Chadwick - Assignment 1 - DirectX 11");
 			Renderer renderer(win, d3d11);
+			LevelDataParser parser;
+			parser.ParseGameData("../GameLevel.txt");
+
 			while (+win.ProcessWindowEvents())
 			{
 				IDXGISwapChain* swap;
