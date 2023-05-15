@@ -17,6 +17,7 @@
 #include "FileIntoString.h"
 #include "renderer.h" // example rendering code (not Gateware code!)
 #include "LevelDataParser.h"
+#include "h2bParser.h"
 // open some namespaces to compact the code a bit
 using namespace GW;
 using namespace CORE;
@@ -40,10 +41,8 @@ int main()
 		win.Register(msgs);
 		if (+d3d11.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT))
 		{
-			win.SetWindowName("Matthew Chadwick - Assignment 1 - DirectX 11");
+			win.SetWindowName("Matthew Chadwick - Level Renderer - DirectX 11");
 			Renderer renderer(win, d3d11);
-			LevelDataParser parser;
-			parser.ParseGameData("../GameLevel.txt");
 
 			while (+win.ProcessWindowEvents())
 			{
@@ -58,8 +57,8 @@ int main()
 				{
 					con->ClearRenderTargetView(view, clr);
 					con->ClearDepthStencilView(depth, D3D11_CLEAR_DEPTH, 1, 0);
-					// TODO: Part 4B
-					renderer.UpdateCamera();
+					// TODO: Uncomment once camera controls are added
+					//renderer.UpdateCamera();
 					renderer.Render();
 					swap->Present(1, 0);
 					// release incremented COM reference counts

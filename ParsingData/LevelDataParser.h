@@ -12,7 +12,16 @@ public:
 		std::string meshModel = "";
 	};
 
-	std::vector<Mesh> * meshes = new std::vector<Mesh>();
+	// TRUE: See all data Parsed in the console
+	// FALSE: No data is outputed tp the console
+	bool muteOutput = true;
+
+	std::vector<Mesh> meshes = std::vector<Mesh>();
+
+	const std::vector<Mesh> GetMeshes()
+	{
+		return meshes;
+	}
 
 	void ParseGameData(const char* filePath)
 	{
@@ -41,7 +50,7 @@ public:
 
 				// Mesh Name
 				std::getline(dataParser, newMesh.meshModel, '\n');
-				
+
 				// Detect duplicates. Could potentially be fooled if a period is in the correct place.
 				if (newMesh.meshModel.at(newMesh.meshModel.length() - 4) == '.')
 				{
@@ -83,27 +92,29 @@ public:
 					}
 				}
 				// Add mesh to parsed meshes
-				meshes->push_back(newMesh);
+				meshes.push_back(newMesh);
 			}
 		}
 
 		// Data dump of Parsed Meshes
-		for (std::vector<Mesh>::iterator itr = meshes->begin(); itr != meshes->end(); itr++)
+		if (!muteOutput)
 		{
-			std::cout << ".h2b filepath: " << itr->meshModel << std::endl << "World Matrix: \n";
-
-			for (int i = 0; i < 16; i += 4)
+			for (std::vector<Mesh>::iterator itr = meshes.begin(); itr != meshes.end(); itr++)
 			{
-				std::cout << itr->world.data[i] << ", " << itr->world.data[i + 1] << ", " << itr->world.data[i + 2] << ", " << itr->world.data[i + 3] << "\n";
-			}
+				std::cout << ".h2b filepath: " << itr->meshModel << std::endl << "World Matrix: \n";
 
-			std::cout << "\n\n";
+				for (int i = 0; i < 16; i += 4)
+				{
+					std::cout << itr->world.data[i] << ", " << itr->world.data[i + 1] << ", " << itr->world.data[i + 2] << ", " << itr->world.data[i + 3] << "\n";
+				}
+
+				std::cout << "\n\n";
+			}
 		}
 	}
 
 	~LevelDataParser()
 	{
-		delete meshes;
 	}
 };
 
