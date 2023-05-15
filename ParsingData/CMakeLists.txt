@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Assignment_1_D3D11)
+project(LevelRenderer)
 
 # CMake FXC shader compilation, add any shaders you want compiled here
 set(VERTEX_SHADERS 
