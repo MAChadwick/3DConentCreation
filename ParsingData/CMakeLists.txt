@@ -19,6 +19,7 @@ set(SOURCE_CODE
 	main.cpp
 	renderer.h
 	FileIntoString.h
+	LevelDataParser.h
 )
 
 if(WIN32)
