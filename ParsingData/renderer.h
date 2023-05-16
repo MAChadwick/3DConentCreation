@@ -69,8 +69,7 @@ class Renderer
 	std::vector<H2B::MATERIAL> materials;
 	std::vector<H2B::BATCH> batches;
 	std::vector<H2B::MESH> meshes;
-
-
+	std::vector<GW::MATH::GMATRIXF> worldMatrices;
 	// TODO: Part 2B 
 	SceneData sceneData;
 	MeshData meshData;
@@ -94,6 +93,7 @@ public:
 				materials.insert(materials.end(), hParse.materials.begin(), hParse.materials.end());
 				batches.insert(batches.end(), hParse.batches.begin(), hParse.batches.end());
 				meshes.push_back(*(hParse.meshes.end() - 1));
+				worldMatrices.push_back(itr->world);
 
 				// Subtract this mesh's indexCount from the total indexs to get the index offset (Maybe?)
 				//(meshes.end() - 1)->drawInfo.indexOffset = indices.size() - (meshes.end() - 1)->drawInfo.indexCount;
@@ -348,12 +348,12 @@ public:
 		// Iterate through parsed meshes to parse h2b data
 		
 		// TODO: Redo this to work with multiple meshes
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < meshes.size(); i++)
 		{
 			float x = (i % 10);
 			float y = 0;
 			float z = (i % 10);
-			MapMeshBufferMatrix(curHandles, InitializeWorldMatrix(GW::MATH::GVECTORF{(float)x, (float)y, (float)z, 1}));
+			MapMeshBufferMatrix(curHandles, worldMatrices[i]);
 			MapMeshBufferMaterial(curHandles, materials.at(meshes[i].materialIndex));
 			curHandles.context->DrawIndexed(meshes[i].drawInfo.indexCount, meshes[i].drawInfo.indexOffset, 0);
 		}
