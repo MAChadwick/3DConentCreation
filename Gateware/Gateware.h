@@ -41,17 +41,17 @@ static_assert(sizeof(void*) == 8, "Gateware supports x64 platforms only.");
 // The Major version is auto-generated based on the current year.
 #define GATEWARE_MAJOR 23
 // The Minor version is auto-generated based on the current day of the year.
-#define GATEWARE_MINOR 125
+#define GATEWARE_MINOR 129
 // The Patch version is auto-generated based on the current UTC hour of the day.
-#define GATEWARE_PATCH 13
+#define GATEWARE_PATCH 15
 // Pulled directly from GIT  
 #define GATEWARE_BRANCH "master"
 // Pulled directly from GIT
-#define GATEWARE_COMMIT_HASH 0x1c53518
+#define GATEWARE_COMMIT_HASH 0x76feac7
 // Standard Window Title Bar
-#define GATEWARE_VERSION_STRING "Gateware v23.125.13"
+#define GATEWARE_VERSION_STRING "Gateware v23.129.15"
 // Window Title Bar displayed in DEBUG builds
-#define GATEWARE_VERSION_STRING_LONG "Gateware v23.125.13 (master) [1c53518]"
+#define GATEWARE_VERSION_STRING_LONG "Gateware v23.129.15 (master) [76feac7]"
 
 #endif
 
@@ -11254,17 +11254,17 @@ static_assert(sizeof(void*) == 8, "Gateware supports x64 platforms only.");
 // The Major version is auto-generated based on the current year.
 #define GATEWARE_MAJOR 23
 // The Minor version is auto-generated based on the current day of the year.
-#define GATEWARE_MINOR 125
+#define GATEWARE_MINOR 129
 // The Patch version is auto-generated based on the current UTC hour of the day.
-#define GATEWARE_PATCH 13
+#define GATEWARE_PATCH 15
 // Pulled directly from GIT  
 #define GATEWARE_BRANCH "master"
 // Pulled directly from GIT
-#define GATEWARE_COMMIT_HASH 0x1c53518
+#define GATEWARE_COMMIT_HASH 0x76feac7
 // Standard Window Title Bar
-#define GATEWARE_VERSION_STRING "Gateware v23.125.13"
+#define GATEWARE_VERSION_STRING "Gateware v23.129.15"
 // Window Title Bar displayed in DEBUG builds
-#define GATEWARE_VERSION_STRING_LONG "Gateware v23.125.13 (master) [1c53518]"
+#define GATEWARE_VERSION_STRING_LONG "Gateware v23.129.15 (master) [76feac7]"
 
 #endif
 
@@ -12628,17 +12628,17 @@ static_assert(sizeof(void*) == 8, "Gateware supports x64 platforms only.");
 // The Major version is auto-generated based on the current year.
 #define GATEWARE_MAJOR 23
 // The Minor version is auto-generated based on the current day of the year.
-#define GATEWARE_MINOR 125
+#define GATEWARE_MINOR 129
 // The Patch version is auto-generated based on the current UTC hour of the day.
-#define GATEWARE_PATCH 13
+#define GATEWARE_PATCH 15
 // Pulled directly from GIT  
 #define GATEWARE_BRANCH "master"
 // Pulled directly from GIT
-#define GATEWARE_COMMIT_HASH 0x1c53518
+#define GATEWARE_COMMIT_HASH 0x76feac7
 // Standard Window Title Bar
-#define GATEWARE_VERSION_STRING "Gateware v23.125.13"
+#define GATEWARE_VERSION_STRING "Gateware v23.129.15"
 // Window Title Bar displayed in DEBUG builds
-#define GATEWARE_VERSION_STRING_LONG "Gateware v23.125.13 (master) [1c53518]"
+#define GATEWARE_VERSION_STRING_LONG "Gateware v23.129.15 (master) [76feac7]"
 
 #endif
 
@@ -14393,17 +14393,17 @@ static_assert(sizeof(void*) == 8, "Gateware supports x64 platforms only.");
 // The Major version is auto-generated based on the current year.
 #define GATEWARE_MAJOR 23
 // The Minor version is auto-generated based on the current day of the year.
-#define GATEWARE_MINOR 125
+#define GATEWARE_MINOR 129
 // The Patch version is auto-generated based on the current UTC hour of the day.
-#define GATEWARE_PATCH 13
+#define GATEWARE_PATCH 15
 // Pulled directly from GIT  
 #define GATEWARE_BRANCH "master"
 // Pulled directly from GIT
-#define GATEWARE_COMMIT_HASH 0x1c53518
+#define GATEWARE_COMMIT_HASH 0x76feac7
 // Standard Window Title Bar
-#define GATEWARE_VERSION_STRING "Gateware v23.125.13"
+#define GATEWARE_VERSION_STRING "Gateware v23.129.15"
 // Window Title Bar displayed in DEBUG builds
-#define GATEWARE_VERSION_STRING_LONG "Gateware v23.125.13 (master) [1c53518]"
+#define GATEWARE_VERSION_STRING_LONG "Gateware v23.129.15 (master) [76feac7]"
 
 #endif
 
@@ -56520,8 +56520,8 @@ namespace GW
 				/////////////////////////
 
 				D3D11_VIEWPORT viewport;
-				unsigned int nTopLeftX = 0;
-				unsigned int nTopLeftY = 0;
+				viewport.TopLeftX = 0;
+				viewport.TopLeftY = 0;
 				viewport.Width = static_cast<float>(width);
 				viewport.Height = static_cast<float>(height);
 				viewport.MinDepth = 0.0f;
@@ -57184,17 +57184,17 @@ static_assert(sizeof(void*) == 8, "Gateware supports x64 platforms only.");
 // The Major version is auto-generated based on the current year.
 #define GATEWARE_MAJOR 23
 // The Minor version is auto-generated based on the current day of the year.
-#define GATEWARE_MINOR 125
+#define GATEWARE_MINOR 129
 // The Patch version is auto-generated based on the current UTC hour of the day.
-#define GATEWARE_PATCH 13
+#define GATEWARE_PATCH 15
 // Pulled directly from GIT  
 #define GATEWARE_BRANCH "master"
 // Pulled directly from GIT
-#define GATEWARE_COMMIT_HASH 0x1c53518
+#define GATEWARE_COMMIT_HASH 0x76feac7
 // Standard Window Title Bar
-#define GATEWARE_VERSION_STRING "Gateware v23.125.13"
+#define GATEWARE_VERSION_STRING "Gateware v23.129.15"
 // Window Title Bar displayed in DEBUG builds
-#define GATEWARE_VERSION_STRING_LONG "Gateware v23.125.13 (master) [1c53518]"
+#define GATEWARE_VERSION_STRING_LONG "Gateware v23.129.15 (master) [76feac7]"
 
 #endif
 

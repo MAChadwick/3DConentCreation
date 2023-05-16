@@ -1,5 +1,54 @@
 // an ultra simple hlsl pixel shader
-float4 main() : SV_TARGET
+// TODO: Part 3A
+struct OBJ_ATTRIBUTES
 {
-	return float4(1.0f, 0, 0, 1); // TODO: Part 1A (optional) 
+	float3       Kd; // diffuse reflectivity
+	float	     d; // dissolve (transparency) 
+	float3       Ks; // specular reflectivity
+	float        Ns; // specular exponent
+	float3       Ka; // ambient reflectivity
+	float        sharpness; // local reflection map sharpness
+	float3       Tf; // transmission filter
+	float        Ni; // optical density (index of refraction)
+	float3       Ke; // emissive reflectivity
+	unsigned int illum; // illumination model
+};
+
+cbuffer SceneData : register(b1)
+{
+	float4 sunDirection, sunColor;
+	float4x4 viewMatrix, projectionMatrix;
+};
+
+cbuffer MeshData : register(b0)
+{
+	float4x4 worldMatrix;
+	OBJ_ATTRIBUTES material;
+};
+
+
+// TODO: Part 4B 
+// TODO: Part 4C 
+// TODO: Part 4F 
+float4 main(float4 posH : SV_POSITION, float3 posW : WORLD, float3 normW : NORMAL) : SV_TARGET
+{
+	//float3 sunAmbient = (0.25, 0.25, 0.35);
+
+	//// Calculate directional light + ambient light
+	//float3 lightRatio = clamp(dot(-sunDirection, normalize(normW)), 0, 1);
+	//lightRatio = clamp(lightRatio + sunAmbient, 0, 1);
+	//float3 lightResult = sunColor * lightRatio;
+
+	//// Calculate reflected light
+	//float3 viewDir = normalize(posH - posW);
+	//float3 halfVector = normalize((-sunDirection) + viewDir);
+	//float3 intensity = dot(halfVector, normW); // Broke this up because it was hurting my brain to look at it
+	//intensity = clamp(intensity, 0, 1);
+	//lightResult += sunColor * pow(intensity, material.Ns) * material.Ks;
+
+	// Add ambient light + diffuse light to reflected light
+
+	//return float4(lightResult * material.Kd, 1); // TODO: Part 1A (optional) 
+
+	return float4(material.Kd, 1);
 }

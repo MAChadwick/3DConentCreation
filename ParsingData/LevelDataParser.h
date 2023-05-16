@@ -32,7 +32,7 @@ public:
 		std::getline(dataParser, data, '\n'); // First line is trash
 
 		// Start parsing data
-		while (!dataParser.eof())
+		while (!dataParser.eof() && dataParser.is_open())
 		{
 			// Format of data should be
 			// Object Type
