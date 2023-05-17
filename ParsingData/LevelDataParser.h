@@ -25,7 +25,7 @@ public:
 	{
 		LightType type;
 		GW::MATH::GMATRIXF direction;
-		GW::MATH::GVECTORF color = { 0.25f, 0, 0, 1 };
+		GW::MATH::GVECTORF color = { 0.75, 0.75, 0.75, 1 };
 	};
 
 	// TRUE: See all data Parsed in the console
@@ -109,9 +109,9 @@ public:
 				// Parse matrix
 				ReadStreamIntoMatrix(newLight.direction, dataParser, data);
 
-				newLight.color.x = (float)(rand() % 255) / 255;
-				newLight.color.y = (float)(rand() % 255) / 255;
-				newLight.color.z = (float)(rand() % 255) / 255;
+				//newLight.color.x = (float)(rand() % 255) / 255;
+				//newLight.color.y = (float)(rand() % 255) / 255;
+				//newLight.color.z = (float)(rand() % 255) / 255;
 
 				// Push into light vector
 				lights.push_back(newLight);

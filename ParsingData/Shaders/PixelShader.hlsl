@@ -36,9 +36,13 @@ float4 main(float4 posH : SV_POSITION, float3 posW : WORLD, float3 normW : NORMA
 	float3 sunAmbient = (0.5, 0.5, 0.5);
 
 	// Calculate directional light + ambient light
-	float3 lightRatio = clamp(dot(-lightDirection, normalize(normW)), 0, 1);
+	/*float3 lightRatio = clamp(dot(-lightDirection, normalize(normW)), 0, 1);
 	lightRatio = clamp(lightRatio + sunAmbient, 0, 1);
-	float3 lightResult = lightColor * lightRatio;
+	float3 lightResult = lightColor * lightRatio;*/
+
+	float3 lightDir = normalize(lightDirection - posW);
+	float3 lightRatio = clamp(dot(lightDir, normW) + sunAmbient, 0, 1);
+	float3 lightResult = lightColor * lightRatio * material.Kd;
 
 	// Calculate reflected light
 	float3 viewDir = normalize(posH - posW);
@@ -51,5 +55,5 @@ float4 main(float4 posH : SV_POSITION, float3 posW : WORLD, float3 normW : NORMA
 
 	return float4(lightResult * material.Kd, 1); // TODO: Part 1A (optional) 
 
-	return float4(material.Kd, 1);
+	//return float4(material.Kd, 1);
 }
