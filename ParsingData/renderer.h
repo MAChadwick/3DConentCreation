@@ -112,7 +112,7 @@ public:
 		GW::GReturn result = matrixMath.Create();
 
 		// TODO: Part 2A
-		GW::MATH::GVECTORF position = { 4, 3.5f, 0, 1};
+		GW::MATH::GVECTORF position = { 6, 3.5f, 8, 1};
 		GW::MATH::GVECTORF lookAt = {1.75f, 0, 3, 1};
 
 		worldMatrix = InitializeWorldMatrix(GW::MATH::GVECTORF{ 0, -10, 0.25f , 1});

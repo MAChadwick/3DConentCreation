@@ -5,11 +5,25 @@
 
 class LevelDataParser
 {
+
 public:
+	enum LightType
+	{
+		Point,
+		Area,
+		Spot
+	};
+
 	struct Mesh
 	{
 		GW::MATH::GMATRIXF world = GW::MATH::GIdentityMatrixF;
 		std::string meshModel = "";
+	};
+
+	struct Light
+	{
+		GW::MATH::GMATRIXF lightDirection;
+		GW::MATH::GVECTORF lightColor = { 1, 1, 1, 1 };
 	};
 
 	// TRUE: See all data Parsed in the console
@@ -61,38 +75,15 @@ public:
 				// Append file path to mesh model
 				newMesh.meshModel = "../h2b/" + newMesh.meshModel + ".h2b";
 
-				int dataIndex = 0;
-
-				// Parse matrix data into matrix
-				for (int i = 0; i < 4; i++)
-				{
-					// Remove starting matrix text, '(',')', '<', '>'
-					std::getline(dataParser, data, ')');
-					data = data.substr(data.find_first_of('(') + 1);
-					std::string ogData = data;
-
-					for (int x = 0; x < 4; x++)
-					{
-						// Get float from substring
-						int commaIndex = data.find(',');
-
-						if (commaIndex == std::string::npos) commaIndex = data.length();
-
-						std::string temp = data.substr(0, commaIndex);
-						float value = std::stof(temp);
-
-						newMesh.world.data[dataIndex] = value;
-
-						// Set data to new substring excluding the previously read value
-						commaIndex = data.find(',') + 1;
-						if (commaIndex == std::string::npos) commaIndex = data.length() - 1;
-
-						data = data.substr(commaIndex);
-						dataIndex++;
-					}
-				}
+				// Parse matrix here
+				ReadStreamIntoMatrix(newMesh, dataParser, data);
+				
 				// Add mesh to parsed meshes
 				meshes.push_back(newMesh);
+			}
+			else if ((data.compare("LIGHT") == 0))
+			{
+
 			}
 		}
 
@@ -116,5 +107,41 @@ public:
 	~LevelDataParser()
 	{
 	}
+
+	private:
+		void ReadStreamIntoMatrix(Mesh& newMesh, std::ifstream& stream, std::string& data)
+		{
+			int dataIndex = 0;
+
+			// Parse matrix data into matrix
+			for (int i = 0; i < 4; i++)
+			{
+				// Remove starting matrix text, '(',')', '<', '>'
+				std::getline(stream, data, ')');
+				data = data.substr(data.find_first_of('(') + 1);
+				std::string ogData = data;
+
+				for (int x = 0; x < 4; x++)
+				{
+					// Get float from substring
+					int commaIndex = data.find(',');
+
+					if (commaIndex == std::string::npos) commaIndex = data.length();
+
+					std::string temp = data.substr(0, commaIndex);
+					float value = std::stof(temp);
+
+					newMesh.world.data[dataIndex] = value;
+
+					// Set data to new substring excluding the previously read value
+					commaIndex = data.find(',') + 1;
+					if (commaIndex == std::string::npos) commaIndex = data.length() - 1;
+
+					data = data.substr(commaIndex);
+					dataIndex++;
+				}
+			}
+		}
+
 };
 
