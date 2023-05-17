@@ -16,7 +16,8 @@ struct OBJ_ATTRIBUTES
 
 cbuffer SceneData : register(b1)
 {
-	float4 sunDirection, sunColor;
+	//int lightType;	// 1 dir, 2 area, 3 spot
+	float4 lightDirection, lightColor;
 	float4x4 viewMatrix, projectionMatrix;
 };
 
@@ -35,16 +36,16 @@ float4 main(float4 posH : SV_POSITION, float3 posW : WORLD, float3 normW : NORMA
 	float3 sunAmbient = (0.5, 0.5, 0.5);
 
 	// Calculate directional light + ambient light
-	float3 lightRatio = clamp(dot(-sunDirection, normalize(normW)), 0, 1);
+	float3 lightRatio = clamp(dot(-lightDirection, normalize(normW)), 0, 1);
 	lightRatio = clamp(lightRatio + sunAmbient, 0, 1);
-	float3 lightResult = sunColor * lightRatio;
+	float3 lightResult = lightColor * lightRatio;
 
 	// Calculate reflected light
 	float3 viewDir = normalize(posH - posW);
-	float3 halfVector = normalize((-sunDirection) + viewDir);
+	float3 halfVector = normalize((-lightDirection) + viewDir);
 	float3 intensity = dot(halfVector, normW); // Broke this up because it was hurting my brain to look at it
 	intensity = clamp(intensity, 0, 1);
-	lightResult += sunColor * pow(intensity, material.Ns) * material.Ks;
+	lightResult += lightColor * pow(intensity, material.Ns) * material.Ks;
 
 	// Add ambient light + diffuse light to reflected light
 

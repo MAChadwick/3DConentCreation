@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <time.h>
 
 class LevelDataParser
 {
@@ -9,7 +10,7 @@ class LevelDataParser
 public:
 	enum LightType
 	{
-		Point,
+		Direction,
 		Area,
 		Spot
 	};
@@ -22,8 +23,9 @@ public:
 
 	struct Light
 	{
-		GW::MATH::GMATRIXF lightDirection;
-		GW::MATH::GVECTORF lightColor = { 1, 1, 1, 1 };
+		LightType type;
+		GW::MATH::GMATRIXF direction;
+		GW::MATH::GVECTORF color = { 0.25f, 0, 0, 1 };
 	};
 
 	// TRUE: See all data Parsed in the console
@@ -31,6 +33,7 @@ public:
 	bool muteOutput = true;
 
 	std::vector<Mesh> meshes = std::vector<Mesh>();
+	std::vector<Light> lights = std::vector<Light>();
 
 	const std::vector<Mesh> GetMeshes()
 	{
@@ -76,13 +79,42 @@ public:
 				newMesh.meshModel = "../h2b/" + newMesh.meshModel + ".h2b";
 
 				// Parse matrix here
-				ReadStreamIntoMatrix(newMesh, dataParser, data);
+				ReadStreamIntoMatrix(newMesh.world, dataParser, data);
 				
 				// Add mesh to parsed meshes
 				meshes.push_back(newMesh);
 			}
 			else if ((data.compare("LIGHT") == 0))
 			{
+				Light newLight;
+
+				//Light type
+				std::string lightType = "";
+
+				std::getline(dataParser, lightType, '\n');
+
+				// Drop number for duplicate lights
+				if (lightType.at(lightType.length() - 4) == '.')
+				{
+					lightType = lightType.substr(0, lightType.length() - 4);
+				}
+
+				if (lightType.compare("Direction") == 0)
+					newLight.type = Direction;
+				else if (lightType.compare("Area") == 0)
+					newLight.type = Area;
+				else if (lightType.compare("Spot") == 0)
+					newLight.type = Spot;
+
+				// Parse matrix
+				ReadStreamIntoMatrix(newLight.direction, dataParser, data);
+
+				newLight.color.x = (float)(rand() % 255) / 255;
+				newLight.color.y = (float)(rand() % 255) / 255;
+				newLight.color.z = (float)(rand() % 255) / 255;
+
+				// Push into light vector
+				lights.push_back(newLight);
 
 			}
 		}
@@ -109,7 +141,7 @@ public:
 	}
 
 	private:
-		void ReadStreamIntoMatrix(Mesh& newMesh, std::ifstream& stream, std::string& data)
+		void ReadStreamIntoMatrix(GW::MATH::GMATRIXF &world, std::ifstream& stream, std::string& data)
 		{
 			int dataIndex = 0;
 
@@ -131,7 +163,7 @@ public:
 					std::string temp = data.substr(0, commaIndex);
 					float value = std::stof(temp);
 
-					newMesh.world.data[dataIndex] = value;
+					world.data[dataIndex] = value;
 
 					// Set data to new substring excluding the previously read value
 					commaIndex = data.find(',') + 1;

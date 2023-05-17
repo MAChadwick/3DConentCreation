@@ -24,15 +24,4 @@ public:
 		objectMaterials = newMaterials;
 		objectWorldMatrix = newWorld;
 	}
-
-	void OverrideIndexOffset(int newOffsetStart)
-	{
-		int extraOffset = 0;
-
-		for (std::vector<H2B::MESH>::iterator itr = objectMeshes.begin(); itr != objectMeshes.end(); itr++)
-		{
-			itr->drawInfo.indexOffset = newOffsetStart + extraOffset;
-			extraOffset += itr->drawInfo.indexCount;
-		}
-	}
 };

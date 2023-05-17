@@ -1,10 +1,6 @@
 // an ultra simple hlsl vertex shader
 #pragma pack_matrix(row_major) 
 
-// an ultra simple hlsl vertex shader
-// TODO: Part 1F
-#pragma pack_matrix(row_major) 
-
 struct Vertex
 {
 	float3 pos : SV_POSITION;
@@ -12,7 +8,6 @@ struct Vertex
 	float3 nrm : NORMAL;
 };
 
-// TODO: Part 2B
 struct OBJ_ATTRIBUTES
 {
 	float3       Kd; // diffuse reflectivity
@@ -36,7 +31,8 @@ struct OutputToRasterizer
 
 cbuffer SceneData : register(b1)
 {
-	float4 sunDirection, sunColor;
+	//int lightType; // 1 dir, 2 area, 3 spot
+	float4 lightDirection, lightColor;
 	float4x4 viewMatrix, projectionMatrix;
 };
 
@@ -46,7 +42,6 @@ cbuffer MeshData : register(b0)
 	OBJ_ATTRIBUTES material;
 };
 
-// TODO: Part 2D 
 float4 Rasterize(float4 inputVertex)
 {
 	inputVertex = mul(inputVertex, worldMatrix);
@@ -54,8 +49,6 @@ float4 Rasterize(float4 inputVertex)
 	return mul(inputVertex, projectionMatrix);
 }
 
-// TODO: Part 4A 
-// TODO: Part 4B 
 OutputToRasterizer main(float3 pos : POSITION, float3 uvw : UVW, float3 nrm : NORMAL)
 {
 	OutputToRasterizer output;

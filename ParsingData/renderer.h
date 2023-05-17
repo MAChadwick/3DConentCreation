@@ -18,7 +18,8 @@ void PrintLabeledDebugString(const char* label, const char* toPrint)
 // Globally shared scene data that is only needed once per scene
 struct SceneData
 {
-	GW::MATH::GVECTORF sunDirection, sunColor;
+	//int lightType;
+	GW::MATH::GVECTORF lightDirection, lightColor;
 	GW::MATH::GMATRIXF viewMatrix, projectionMatrix;
 };
 
@@ -349,9 +350,13 @@ public:
 		float indexCount = 0;
 		float indexOffset = 0;
 
-		// Iterate through parsed meshes to parse h2b data
-		
-		// TODO: Redo this to work with multiple meshes
+		// Render lighting first
+		for (int i = 0; i < lParse.lights.size(); i++)
+		{
+			MapSceneBufferLight(curHandles, lParse.lights[i]);
+			curHandles.context->Draw(0, 0);
+		}
+
 		for (int i = 0; i < objectData.size(); i++)
 		{
 			float x = -50 + (i * 4);
@@ -378,6 +383,20 @@ private:
 		ID3D11RenderTargetView* targetView;
 		ID3D11DepthStencilView* depthStencil;
 	};
+
+	void MapSceneBufferLight(PipelineHandles curHandles, LevelDataParser::Light newLight)
+	{
+		D3D11_MAPPED_SUBRESOURCE subResource;
+
+		subResource.pData = sceneBuffer.Get();
+		//sceneData.lightType = newLight.type;
+		sceneData.lightColor = newLight.color;
+		sceneData.lightDirection = newLight.direction.row4;
+
+		curHandles.context->Map(sceneBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource);
+		memcpy(subResource.pData, &sceneData, sizeof(sceneData));
+		curHandles.context->Unmap(sceneBuffer.Get(), 0);
+	}
 
 	void MapMeshBufferMatrix(PipelineHandles curHandles, GW::MATH::GMATRIXF newWorld)
 	{
