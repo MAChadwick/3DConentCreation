@@ -1,6 +1,7 @@
 #include <d3dcompiler.h>	// required for compiling shaders on the fly, consider pre-compiling instead
 #include "h2bParser.h"
 #include "LevelDataParser.h"
+#include "ObjectData.h"
 #pragma comment(lib, "d3dcompiler.lib") 
 
 void PrintLabeledDebugString(const char* label, const char* toPrint)
@@ -29,7 +30,6 @@ struct MeshData
 	H2B::MATERIAL material;
 };
 
-// TODO: Part 4E 
 
 // Creation, Rendering & Cleanup
 class Renderer
@@ -60,16 +60,16 @@ class Renderer
 	GW::MATH::GMATRIXF worldMatrix = GW::MATH::GIdentityMatrixF;
 	GW::MATH::GMATRIXF viewMatrix = GW::MATH::GIdentityMatrixF;
 	GW::MATH::GMATRIXF projectionMatrix = GW::MATH::GIdentityMatrixF;
-	GW::MATH::GVECTORF lightDirection = { -1, -1, 2, 0 };
+	GW::MATH::GVECTORF lightDirection = { -2, 2, 2, 0 };
 	GW::MATH::GVECTORF lightColor = { 0.9f, 0.9f, 1.0f, 1.0f }; // rgba
 
 	// Vectors for holding object data
+	std::vector<std::string> meshNames;
 	std::vector<H2B::VERTEX> vertices;
 	std::vector<unsigned> indices;
-	std::vector<H2B::MATERIAL> materials;
-	std::vector<H2B::BATCH> batches;
-	std::vector<H2B::MESH> meshes;
+	std::vector<ObjectData> objectData;
 	std::vector<GW::MATH::GMATRIXF> worldMatrices;
+
 	// TODO: Part 2B 
 	SceneData sceneData;
 	MeshData meshData;
@@ -81,22 +81,26 @@ public:
 		lParse.ParseGameData("../GameLevel.txt");
 
 		// Parse h2b data and add to local vectors
-		for (std::vector<LevelDataParser::Mesh>::iterator itr = lParse.meshes.begin() + 1; itr != lParse.meshes.end(); itr++)
+		for (std::vector<LevelDataParser::Mesh>::iterator itr = lParse.meshes.begin(); itr != lParse.meshes.end(); itr++)
 		{
 			bool success = hParse.Parse(itr->meshModel.c_str());
 
 			// Since hParse isn't saving each parsed mesh, I am adding them to a local vector to save them.
 			if (success)
 			{
-				vertices.insert(vertices.end(), hParse.vertices.begin(), hParse.vertices.end());
-				indices.insert(indices.end(), hParse.indices.begin(), hParse.indices.end());
-				materials.insert(materials.end(), hParse.materials.begin(), hParse.materials.end());
-				batches.insert(batches.end(), hParse.batches.begin(), hParse.batches.end());
-				meshes.push_back(*(hParse.meshes.end() - 1));
-				worldMatrices.push_back(itr->world);
+				// Basically creating instances of each object instead of just pasting all of the vertices into one vector
+				if (!std::count(meshNames.begin(), meshNames.end(), itr->meshModel))
+				{
+					vertices.insert(vertices.end(), hParse.vertices.begin(), hParse.vertices.end());
+					indices.insert(indices.end(), hParse.indices.begin(), hParse.indices.end());
 
-				// Subtract this mesh's indexCount from the total indexs to get the index offset (Maybe?)
-				//(meshes.end() - 1)->drawInfo.indexOffset = indices.size() - (meshes.end() - 1)->drawInfo.indexCount;
+					meshNames.push_back(itr->meshModel);
+				}
+
+				// Individual instances of objects
+				ObjectData newObject = { hParse.meshes, hParse.vertices, hParse.indices, hParse.materials, itr->world };
+
+				objectData.push_back(newObject);
 			}
 		}
 
@@ -108,8 +112,8 @@ public:
 		GW::GReturn result = matrixMath.Create();
 
 		// TODO: Part 2A
-		GW::MATH::GVECTORF position = { 0, 0.75f, -1.5f, 1};
-		GW::MATH::GVECTORF lookAt = {0, 0, 0, 1};
+		GW::MATH::GVECTORF position = { 4, 3.5f, 0, 1};
+		GW::MATH::GVECTORF lookAt = {1.75f, 0, 3, 1};
 
 		worldMatrix = InitializeWorldMatrix(GW::MATH::GVECTORF{ 0, -10, 0.25f , 1});
 
@@ -199,14 +203,14 @@ private:
 	void CreateVertexBuffer(ID3D11Device* creator, const void* data, unsigned int sizeInBytes)
 	{
 		D3D11_SUBRESOURCE_DATA bData = { data, 0, 0 };
-		CD3D11_BUFFER_DESC bDesc(sizeInBytes, D3D11_BIND_VERTEX_BUFFER);
+		CD3D11_BUFFER_DESC bDesc(sizeInBytes, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 		creator->CreateBuffer(&bDesc, &bData, vertexBuffer.GetAddressOf());
 	}
 
 	void CreateIndexBuffer(ID3D11Device* creator, const void* data, unsigned int sizeInBytes)
 	{
 		D3D11_SUBRESOURCE_DATA bData = { data, 0, 0 };
-		CD3D11_BUFFER_DESC bDesc(sizeInBytes, D3D11_BIND_INDEX_BUFFER);
+		CD3D11_BUFFER_DESC bDesc(sizeInBytes, D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 		creator->CreateBuffer(&bDesc, &bData, indexBuffer.GetAddressOf());
 	}
 
@@ -348,14 +352,19 @@ public:
 		// Iterate through parsed meshes to parse h2b data
 		
 		// TODO: Redo this to work with multiple meshes
-		for (int i = 0; i < meshes.size(); i++)
+		for (int i = 0; i < objectData.size(); i++)
 		{
-			float x = (i % 10);
-			float y = 0;
-			float z = (i % 10);
-			MapMeshBufferMatrix(curHandles, worldMatrices[i]);
-			MapMeshBufferMaterial(curHandles, materials.at(meshes[i].materialIndex));
-			curHandles.context->DrawIndexed(meshes[i].drawInfo.indexCount, meshes[i].drawInfo.indexOffset, 0);
+			float x = -50 + (i * 4);
+
+			MapMeshBufferMatrix(curHandles, objectData[i].objectWorldMatrix);
+			MapVertexBufferData(curHandles, objectData[i].objectVerts);
+			MapIndexBufferData(curHandles, objectData[i].objectIndices);
+
+			for (int x = 0; x < objectData[i].objectMeshes.size(); x++)
+			{
+				MapMeshBufferMaterial(curHandles, objectData[i].objectMaterials.at(objectData[i].objectMeshes[x].materialIndex));
+				curHandles.context->DrawIndexed(objectData[i].objectMeshes[x].drawInfo.indexCount, objectData[i].objectMeshes[x].drawInfo.indexOffset, 0);
+			}
 		}
 
 		// TODO: Part 1D 2
@@ -394,25 +403,25 @@ private:
 		curHandles.context->Unmap(meshBuffer.Get(), 0);
 	}
 
-	void MapVertexBufferData(PipelineHandles curHandles)
+	void MapVertexBufferData(PipelineHandles curHandles, std::vector<H2B::VERTEX> newVerts)
 	{
 		D3D11_MAPPED_SUBRESOURCE subResource;
 
 		subResource.pData = vertexBuffer.Get();
 
 		curHandles.context->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource);
-		memcpy(subResource.pData, &hParse.vertices, sizeof(hParse.vertices));
+		memcpy(subResource.pData, &newVerts[0], sizeof(H2B::VERTEX) * newVerts.size());
 		curHandles.context->Unmap(vertexBuffer.Get(), 0);
 	}
 
-	void MapIndexBufferData(PipelineHandles curHandles)
+	void MapIndexBufferData(PipelineHandles curHandles, std::vector<unsigned> newIndices)
 	{
 		D3D11_MAPPED_SUBRESOURCE subResource;
 
 		subResource.pData = indexBuffer.Get();
 
 		curHandles.context->Map(indexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource);
-		memcpy(subResource.pData, &hParse.indices, sizeof(hParse.indices));
+		memcpy(subResource.pData, &newIndices[0], sizeof(unsigned) * newIndices.size());
 		curHandles.context->Unmap(indexBuffer.Get(), 0);
 	}
 

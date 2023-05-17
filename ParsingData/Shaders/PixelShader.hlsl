@@ -32,23 +32,23 @@ cbuffer MeshData : register(b0)
 // TODO: Part 4F 
 float4 main(float4 posH : SV_POSITION, float3 posW : WORLD, float3 normW : NORMAL) : SV_TARGET
 {
-	//float3 sunAmbient = (0.25, 0.25, 0.35);
+	float3 sunAmbient = (0.5, 0.5, 0.5);
 
-	//// Calculate directional light + ambient light
-	//float3 lightRatio = clamp(dot(-sunDirection, normalize(normW)), 0, 1);
-	//lightRatio = clamp(lightRatio + sunAmbient, 0, 1);
-	//float3 lightResult = sunColor * lightRatio;
+	// Calculate directional light + ambient light
+	float3 lightRatio = clamp(dot(-sunDirection, normalize(normW)), 0, 1);
+	lightRatio = clamp(lightRatio + sunAmbient, 0, 1);
+	float3 lightResult = sunColor * lightRatio;
 
-	//// Calculate reflected light
-	//float3 viewDir = normalize(posH - posW);
-	//float3 halfVector = normalize((-sunDirection) + viewDir);
-	//float3 intensity = dot(halfVector, normW); // Broke this up because it was hurting my brain to look at it
-	//intensity = clamp(intensity, 0, 1);
-	//lightResult += sunColor * pow(intensity, material.Ns) * material.Ks;
+	// Calculate reflected light
+	float3 viewDir = normalize(posH - posW);
+	float3 halfVector = normalize((-sunDirection) + viewDir);
+	float3 intensity = dot(halfVector, normW); // Broke this up because it was hurting my brain to look at it
+	intensity = clamp(intensity, 0, 1);
+	lightResult += sunColor * pow(intensity, material.Ns) * material.Ks;
 
 	// Add ambient light + diffuse light to reflected light
 
-	//return float4(lightResult * material.Kd, 1); // TODO: Part 1A (optional) 
+	return float4(lightResult * material.Kd, 1); // TODO: Part 1A (optional) 
 
 	return float4(material.Kd, 1);
 }
