@@ -99,19 +99,32 @@ public:
 					lightType = lightType.substr(0, lightType.length() - 4);
 				}
 
-				if (lightType.compare("Direction") == 0)
-					newLight.type = Direction;
-				else if (lightType.compare("Area") == 0)
-					newLight.type = Area;
-				else if (lightType.compare("Spot") == 0)
-					newLight.type = Spot;
-
 				// Parse matrix
 				ReadStreamIntoMatrix(newLight.direction, dataParser, data);
 
-				//newLight.color.x = (float)(rand() % 255) / 255;
-				//newLight.color.y = (float)(rand() % 255) / 255;
-				//newLight.color.z = (float)(rand() % 255) / 255;
+				// Get color line for lights
+				std::getline(dataParser, data, '\n');
+
+				if (lightType.compare("AREA") == 0)
+					newLight.type = Direction;
+				else if (lightType.compare("POINT") == 0)
+					newLight.type = Area;
+				else if (lightType.compare("SPOT") == 0)
+					newLight.type = Spot;
+
+				std::getline(dataParser, data, '\n');
+
+				// Remove extra info and parse color value
+				for (int x = 0; x < 3; x++)
+				{
+					int index = data.find_first_of('=') + 1;
+					data = data.substr(index);
+					std::string temp = data.substr(0, 6);
+
+					float value = std::stof(data);
+					newLight.color.data[x] = value;
+				}
+
 
 				// Push into light vector
 				lights.push_back(newLight);
@@ -172,6 +185,9 @@ public:
 					data = data.substr(commaIndex);
 					dataIndex++;
 				}
+
+				// Trash last '>' left over from data parsing
+				std::getline(stream, data, '\n');
 			}
 		}
 
