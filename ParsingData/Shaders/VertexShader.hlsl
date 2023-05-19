@@ -1,4 +1,5 @@
 // an ultra simple hlsl vertex shader
+// TODO: Part 1F
 #pragma pack_matrix(row_major) 
 
 struct Vertex
@@ -8,6 +9,16 @@ struct Vertex
 	float3 nrm : NORMAL;
 };
 
+struct Light // 0 = direction, 1 = area, 2 = spot
+{
+	int			type;
+	float4		rotation;
+	float4x4	position; 
+	float3		color;
+};
+
+
+// TODO: Part 2B
 struct OBJ_ATTRIBUTES
 {
 	float3       Kd; // diffuse reflectivity
@@ -31,8 +42,11 @@ struct OutputToRasterizer
 
 cbuffer SceneData : register(b1)
 {
-	//int lightType; // 1 dir, 2 area, 3 spot
-	float4 lightDirection, lightColor;
+	// int lightType;
+	float4 lightRotation;
+	float4 lightPosition;
+	float3 lightColor;
+	float4 cameraPos;
 	float4x4 viewMatrix, projectionMatrix;
 };
 
@@ -42,14 +56,17 @@ cbuffer MeshData : register(b0)
 	OBJ_ATTRIBUTES material;
 };
 
-float4 Rasterize(float4 inputVertex)
+// TODO: Part 2D 
+float4 Rasterize(float4 inputVector)
 {
-	inputVertex = mul(inputVertex, worldMatrix);
-	inputVertex = mul(inputVertex, viewMatrix);
-	return mul(inputVertex, projectionMatrix);
+	inputVector = mul(inputVector, worldMatrix);
+	inputVector = mul(inputVector, viewMatrix);
+	return mul(inputVector, projectionMatrix);
 }
 
-OutputToRasterizer main(float3 pos : POSITION, float3 uvw : UVW, float3 nrm : NORMAL)
+// TODO: Part 4A 
+// TODO: Part 4B 
+OutputToRasterizer main(float3 pos : POSITION, float3 uvw : UVW, float3 nrm : NORMAL) 
 {
 	OutputToRasterizer output;
 	output.posH = Rasterize(float4(pos, 1));
@@ -58,4 +75,3 @@ OutputToRasterizer main(float3 pos : POSITION, float3 uvw : UVW, float3 nrm : NO
 
 	return output;
 }
-

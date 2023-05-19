@@ -8,12 +8,6 @@ class LevelDataParser
 {
 
 public:
-	enum LightType
-	{
-		Direction,
-		Area,
-		Spot
-	};
 
 	struct Mesh
 	{
@@ -23,14 +17,17 @@ public:
 
 	struct Light
 	{
-		LightType type;
-		GW::MATH::GMATRIXF direction;
+		int type;
+		GW::MATH::GQUATERNIONF rotation;
+		GW::MATH::GMATRIXF position;
 		GW::MATH::GVECTORF color = { 0.75, 0.75, 0.75, 1 };
 	};
 
 	// TRUE: See all data Parsed in the console
 	// FALSE: No data is outputed tp the console
 	bool muteOutput = true;
+
+	Mesh camera;
 
 	std::vector<Mesh> meshes = std::vector<Mesh>();
 	std::vector<Light> lights = std::vector<Light>();
@@ -61,6 +58,7 @@ public:
 
 			// Object Type
 			std::getline(dataParser, data, '\n');
+
 			if (data.compare("MESH") == 0)
 			{
 				Mesh newMesh;
@@ -69,7 +67,7 @@ public:
 				std::getline(dataParser, newMesh.meshModel, '\n');
 
 				// Detect duplicates. Could potentially be fooled if a period is in the correct place.
-				if (newMesh.meshModel.at(newMesh.meshModel.length() - 4) == '.')
+				if (newMesh.meshModel.length() > 3 && newMesh.meshModel.at(newMesh.meshModel.length() - 4) == '.')
 				{
 					// Drop numbers for duplicate meshes
 					newMesh.meshModel = newMesh.meshModel.substr(0, newMesh.meshModel.length() - 4);
@@ -88,47 +86,44 @@ public:
 			{
 				Light newLight;
 
-				//Light type
-				std::string lightType = "";
+				// Trash line for now
+				std::getline(dataParser, data, '\n');
 
-				std::getline(dataParser, lightType, '\n');
-
-				// Drop number for duplicate lights
-				if (lightType.at(lightType.length() - 4) == '.')
+				// Drop number for duplicate lights - Also trash for now
+				if (data.length () > 3 && data.at(data.length() - 4) == '.')
 				{
-					lightType = lightType.substr(0, lightType.length() - 4);
+					data = data.substr(0, data.length() - 4);
 				}
 
 				// Parse matrix
-				ReadStreamIntoMatrix(newLight.direction, dataParser, data);
+				ReadStreamIntoMatrix(newLight.position, dataParser, data);
 
-				// Get color line for lights
-				std::getline(dataParser, data, '\n');
+				// Parse Light data
+				ReadStreamIntoLight(dataParser, data, newLight);
 
-				if (lightType.compare("AREA") == 0)
-					newLight.type = Direction;
-				else if (lightType.compare("POINT") == 0)
-					newLight.type = Area;
-				else if (lightType.compare("SPOT") == 0)
-					newLight.type = Spot;
-
-				std::getline(dataParser, data, '\n');
-
-				// Remove extra info and parse color value
-				for (int x = 0; x < 3; x++)
+				// Parse rotation data - Formatted in w, x, y, z
+				for (int x = 0; x < 4; x++)
 				{
 					int index = data.find_first_of('=') + 1;
 					data = data.substr(index);
 					std::string temp = data.substr(0, 6);
 
 					float value = std::stof(data);
-					newLight.color.data[x] = value;
+					newLight.rotation.data[(x + 3) % 4] = value;
 				}
 
+				// Trash last bit of ;ine from parsing
+				std::getline(dataParser, data, '\n');
 
 				// Push into light vector
 				lights.push_back(newLight);
 
+			}
+			else if ((data.compare("CAMERA") == 0))
+			{
+				std::getline(dataParser, data, '\n');
+
+				ReadStreamIntoMatrix(camera.world, dataParser, data);
 			}
 		}
 
@@ -189,6 +184,37 @@ public:
 				// Trash last '>' left over from data parsing
 				std::getline(stream, data, '\n');
 			}
+		}
+
+		void ReadStreamIntoLight(std::ifstream &stream, std::string &data, Light &newLight)
+		{
+			// Get color line for lights
+			std::getline(stream, data, '\n');
+
+			if (data.compare("POINT") == 0)
+				newLight.type = 0;
+			else if (data.compare("AREA") == 0)
+				newLight.type = 1;
+			else if (data.compare("SPOT") == 0)
+				newLight.type = 2;
+			else
+				newLight.type = 0;
+
+			std::getline(stream, data, '\n');
+
+			// Remove extra info and parse color value
+			for (int x = 0; x < 3; x++)
+			{
+				int index = data.find_first_of('=') + 1;
+				data = data.substr(index);
+				std::string temp = data.substr(0, 6);
+
+				float value = std::stof(data);
+				newLight.color.data[x] = value;
+			}
+
+			// Finish line
+			std::getline(stream, data, '\n');
 		}
 
 };

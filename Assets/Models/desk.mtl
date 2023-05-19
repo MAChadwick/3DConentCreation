@@ -1,12 +1,12 @@
-# Blender MTL File: 'desk.blend'
-# Material Count: 1
+# Blender 3.3.1 MTL File: 'Level.blend'
+# www.blender.org
 
-newmtl Material.009
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
+newmtl Desk
+Ns 106.753822
+Ka 0.590551 0.590551 0.590551
+Kd 0.698186 0.647363 0.508136
+Ks 0.586614 0.586614 0.586614
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 3

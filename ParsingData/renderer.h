@@ -18,11 +18,12 @@ void PrintLabeledDebugString(const char* label, const char* toPrint)
 // Globally shared scene data that is only needed once per scene
 struct SceneData
 {
-	//int lightType;
-	GW::MATH::GVECTORF lightDirection, lightColor;
+	GW::MATH::GQUATERNIONF lightRotation;
+	GW::MATH::GVECTORF lightPosition;
+	GW::MATH::GVECTORF lightColor;
+	GW::MATH::GVECTORF cameraPos;
 	GW::MATH::GMATRIXF viewMatrix, projectionMatrix;
 };
-
 
 // Information that is unique for each mesh
 struct MeshData
@@ -71,9 +72,13 @@ class Renderer
 	std::vector<ObjectData> objectData;
 	std::vector<GW::MATH::GMATRIXF> worldMatrices;
 
-	// TODO: Part 2B 
+	// Shader data
 	SceneData sceneData;
 	MeshData meshData;
+
+	// User input
+	GW::INPUT::GInput input;
+	GW::INPUT::GController controller;
 
 public:
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GDirectX11Surface _d3d)
@@ -118,12 +123,18 @@ public:
 
 		worldMatrix = InitializeWorldMatrix(GW::MATH::GVECTORF{ 0, -10, 0.25f , 1});
 
-		viewMatrix = InitializeViewMatrix(viewMatrix, position, lookAt);
+		viewMatrix = InitializeViewMatrix(viewMatrix, lParse.camera.world.row4, lookAt);
 
 		projectionMatrix = InitialzieProjectionMatrix(projectionMatrix, 65.0f, 0.1f, 100.0f);
 
-		sceneData = { lightDirection, lightColor, viewMatrix, projectionMatrix };
+		LevelDataParser::Light newLight = lParse.lights[0];
+
+		sceneData = { newLight.rotation, newLight.position.row4, newLight.color, lParse.camera.world.row4, viewMatrix, projectionMatrix };
 		meshData.worldMatrix = worldMatrix;
+
+		// Create input proxies
+		input.Create(win);
+		controller.Create();
 
 		IntializeGraphics();
 	}
@@ -161,11 +172,9 @@ private:
 
 	GW::MATH::GMATRIXF InitializeViewMatrix(GW::MATH::GMATRIXF viewMatrix, GW::MATH::GVECTORF translation, GW::MATH::GVECTORF lookAt)
 	{
-		GW::GReturn greturn = GW::MATH::GMatrix::TranslateLocalF(viewMatrix, translation, viewMatrix);
-
 		GW::MATH::GVECTORF up = { 0, 1, 0, 1 };
 
-		greturn = matrixMath.LookAtLHF(translation, lookAt, up, viewMatrix);
+		matrixMath.LookAtLHF(translation, lookAt, up, viewMatrix);
 
 		return viewMatrix;
 	}
@@ -187,7 +196,6 @@ private:
 
 	void InitializeIndexBuffer(ID3D11Device* creator)
 	{
-		int empty[5000] = {};
 		CreateIndexBuffer(creator, &indices[0], sizeof(unsigned) * indices.size());
 	}
 
@@ -353,13 +361,17 @@ public:
 		// Render lighting first
 		for (int i = 0; i < lParse.lights.size(); i++)
 		{
-			MapSceneBufferLight(curHandles, lParse.lights[i]);
+			sceneData.lightColor = lParse.lights[i].color;
+			sceneData.lightPosition = lParse.lights[i].position.row4;
+			sceneData.lightRotation = lParse.lights[i].rotation;
+			// ViewMatrix and CameraPos is updated in UpdateCamera
+
+			MapSceneBufferData(curHandles);
 			curHandles.context->Draw(0, 0);
 		}
 
 		for (int i = 0; i < objectData.size(); i++)
 		{
-			float x = -50 + (i * 4);
 
 			MapMeshBufferMatrix(curHandles, objectData[i].objectWorldMatrix);
 			MapVertexBufferData(curHandles, objectData[i].objectVerts);
@@ -372,8 +384,95 @@ public:
 			}
 		}
 
-		// TODO: Part 1D 2
 		ReleasePipelineHandles(curHandles);
+	}
+
+	void UpdateCamera()
+	{
+		static std::chrono::steady_clock::time_point last;
+		std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+
+		float deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(now - last).count() / 1000000.0f;
+		last = now;
+		// Get Temp copy of view and invert it
+		GW::MATH::GMATRIXF temp;
+		matrixMath.InverseF(viewMatrix, temp);
+
+		// Get user input for camera
+		float totalXChange = 0;
+		float totalYChange = 0;
+		float totalZChange = 0;
+		float totalYawChange = 0;
+		float totalPitchChange = 0;
+		const float cameraSpeed = 3.0f;
+
+		float keyboardInputs[6] = { 0, 0, 0, 0, 0, 0 }; // space, shift, w, a, s, d
+		float mouseInputs[4] = { 0, 0, 0, 0 }; // Left Click, Right Click, x-axis, y-axis
+		float controllerInputs[6] = { 0, 0, 0, 0 }; // rt, lt, lsx, lsy, rsx, rsy
+
+		input.GetState(23, keyboardInputs[0]); // space
+		input.GetState(14, keyboardInputs[1]); // lshift
+		input.GetState(60, keyboardInputs[2]); // w
+		input.GetState(38, keyboardInputs[3]); // a
+		input.GetState(56, keyboardInputs[4]); // s
+		input.GetState(41, keyboardInputs[5]); // d
+		input.GetMouseDelta(mouseInputs[2], mouseInputs[3]); // Mouse Axis Delta
+
+		std::cout << mouseInputs[2] << " " << mouseInputs[3] << std::endl;
+
+		if (mouseInputs[2] >= -1 && mouseInputs[2] <= 1) mouseInputs[2] = 0;
+		if (mouseInputs[3] >= -1 && mouseInputs[3] <= 1) mouseInputs[3] = 0;
+
+
+		controller.GetState(controller, 7, controllerInputs[0]); // rt
+		controller.GetState(controller, 6, controllerInputs[1]); // lt
+		controller.GetState(controller, 16, controllerInputs[2]); // lsx
+		controller.GetState(controller, 17, controllerInputs[3]); // lsy
+		controller.GetState(controller, 18, controllerInputs[4]); // rsx
+		controller.GetState(controller, 19, controllerInputs[5]); // rsy
+
+		float perFrameSpeed = cameraSpeed * deltaTime;
+		float rotationSpeed = deltaTime;
+		float thumbstickSpeed = 3.14f * deltaTime;
+		float aspectRatio = 0;
+		d3d.GetAspectRatio(aspectRatio);
+
+		// Total all input
+		totalXChange = (-keyboardInputs[3] + keyboardInputs[5]) - controllerInputs[2];
+		totalYChange = (keyboardInputs[0] - keyboardInputs[1]) + (controllerInputs[0] - controllerInputs[1]);
+		totalZChange = (keyboardInputs[2] - keyboardInputs[4]) + controllerInputs[3];
+		totalPitchChange = (65.0f * (mouseInputs[3] / 600.0f) + (controllerInputs[5] * thumbstickSpeed));
+		totalYawChange = (65.0f * aspectRatio * (mouseInputs[2] / 800.0f) + controllerInputs[4] * thumbstickSpeed);
+
+		// Translate camera based on inputs
+		matrixMath.TranslateLocalF(temp, GW::MATH::GVECTORF{ totalXChange * perFrameSpeed, totalYChange * perFrameSpeed, totalZChange * perFrameSpeed, 0 }, temp);
+
+		// Rotate camera based on inputs
+		GW::MATH::GMATRIXF pitchMatrix = GW::MATH::GIdentityMatrixF;
+		GW::MATH::GMATRIXF yawMatrix = GW::MATH::GIdentityMatrixF;
+		matrixMath.RotateXLocalF(pitchMatrix, totalPitchChange * rotationSpeed, pitchMatrix);
+		matrixMath.RotateYGlobalF(yawMatrix, totalYawChange * rotationSpeed, yawMatrix);
+
+		matrixMath.MultiplyMatrixF(pitchMatrix, temp, temp);
+
+		// Save camera position
+		GW::MATH::GVECTORF tempPos = { temp.row4.x, temp.row4.y, temp.row4.z, temp.row4.w };
+		matrixMath.MultiplyMatrixF(yawMatrix, temp, temp);
+
+		// Restore camera position
+		temp.row4.x = tempPos.x;
+		temp.row4.y = tempPos.y;
+		temp.row4.z = tempPos.z;
+		temp.row4.w = tempPos.w;
+
+		// Set CameraPos in SceneData
+		sceneData.cameraPos = tempPos;
+
+		// Invert and reassign the view matrix
+		matrixMath.InverseF(temp, viewMatrix);
+
+		sceneData.viewMatrix = viewMatrix;
+		sceneData.cameraPos = viewMatrix.row4;
 	}
 
 private:
@@ -384,19 +483,17 @@ private:
 		ID3D11DepthStencilView* depthStencil;
 	};
 
-	void MapSceneBufferLight(PipelineHandles curHandles, LevelDataParser::Light newLight)
+	void MapSceneBufferData(PipelineHandles curHandles)
 	{
 		D3D11_MAPPED_SUBRESOURCE subResource;
 
 		subResource.pData = sceneBuffer.Get();
-		//sceneData.lightType = newLight.type;
-		sceneData.lightColor = newLight.color;
-		sceneData.lightDirection = newLight.direction.row4;
 
 		curHandles.context->Map(sceneBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource);
 		memcpy(subResource.pData, &sceneData, sizeof(sceneData));
 		curHandles.context->Unmap(sceneBuffer.Get(), 0);
 	}
+
 
 	void MapMeshBufferMatrix(PipelineHandles curHandles, GW::MATH::GMATRIXF newWorld)
 	{
