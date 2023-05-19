@@ -63,7 +63,7 @@ float4 main(float4 posH : SV_POSITION, float3 posW : WORLD, float3 normW : NORMA
 
 	// Calculate reflected light
 	float3 viewDir = normalize(cameraPos - posW);
-	float3 halfVector = normalize(normalize(-lightRotation) + viewDir);
+	float3 halfVector = normalize(normalize(-lightPosition) + viewDir);
 	float3 intensity = dot(halfVector, normW); // Broke this up because it was hurting my brain to look at it
 	intensity = clamp(intensity, 0, 1); 
 	intensity = pow(intensity, material.Ns);
