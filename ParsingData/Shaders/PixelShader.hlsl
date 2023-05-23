@@ -45,9 +45,9 @@ float3 CalculateDirectionalLight(float3 normW, float3 posW)
 
 float3 CalculatePointLight(float3 normW, float3 posW)
 {
-	float3 sunAmbient = (0.25, 0.25, 0.25);
+	float3 sunAmbient = (0.05, 0.05, 0.05);
 
-	float3 lightDir = normalize(normalize(lightPosition) - posW);
+	float3 lightDir = normalize(normalize(lightPosition) - normalize(posW));
 
 	float3 lightRatio = clamp(dot(lightDir, normalize(normW)), 0, 1);
 
@@ -59,7 +59,7 @@ float3 CalculatePointLight(float3 normW, float3 posW)
 
 float4 main(float4 posH : SV_POSITION, float3 posW : WORLD, float3 normW : NORMAL) : SV_TARGET
 {
-	float3 lightResult = CalculateDirectionalLight(normW, posW);
+	float3 lightResult = CalculatePointLight(normW, posW);
 
 	// Calculate reflected light
 	float3 viewDir = normalize(cameraPos - posW);

@@ -418,8 +418,6 @@ public:
 		input.GetState(41, keyboardInputs[5]); // d
 		input.GetMouseDelta(mouseInputs[2], mouseInputs[3]); // Mouse Axis Delta
 
-		std::cout << mouseInputs[2] << " " << mouseInputs[3] << std::endl;
-
 		if (mouseInputs[2] >= -1 && mouseInputs[2] <= 1) mouseInputs[2] = 0;
 		if (mouseInputs[3] >= -1 && mouseInputs[3] <= 1) mouseInputs[3] = 0;
 
