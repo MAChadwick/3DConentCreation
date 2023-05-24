@@ -57,7 +57,7 @@ int main()
 				{
 					con->ClearRenderTargetView(view, clr);
 					con->ClearDepthStencilView(depth, D3D11_CLEAR_DEPTH, 1, 0);
-					// TODO: Uncomment once camera controls are added
+
 					renderer.UpdateCamera();
 					renderer.Render();
 					swap->Present(1, 0);

@@ -12,9 +12,11 @@ struct Vertex
 struct Light // 0 = direction, 1 = area, 2 = spot
 {
 	int			type;
+	float		falloff;
+	float2		padding;
 	float4		rotation;
-	float4x4	position; 
-	float3		color;
+	float4		position; 
+	float4		color;
 };
 
 
@@ -35,17 +37,14 @@ struct OBJ_ATTRIBUTES
 
 struct OutputToRasterizer
 {
-	float4 posH : SV_POSITION;	// Position in homogenous projection space
-	float3 posW : WORLD;		// Position in world space
-	float3 normW : NORMAL;		// Normal in world space
+	float4 posH : SV_POSITION;		// Position in homogenous projection space
+	float3 posW : WORLD;			// Position in world space
+	float3 normW : NORMAL;			// Normal in world space
 };
 
 cbuffer SceneData : register(b1)
 {
-	// int lightType;
-	float4 lightRotation;
-	float4 lightPosition;
-	float3 lightColor;
+	Light light;
 	float4 cameraPos;
 	float4x4 viewMatrix, projectionMatrix;
 };
@@ -62,6 +61,12 @@ float4 Rasterize(float4 inputVector)
 	inputVector = mul(inputVector, worldMatrix);
 	inputVector = mul(inputVector, viewMatrix);
 	return mul(inputVector, projectionMatrix);
+}
+
+float4 CalculateLightPos(float4 inputVector)
+{
+	inputVector = mul(inputVector, worldMatrix);
+	return mul(inputVector, viewMatrix);
 }
 
 // TODO: Part 4A 

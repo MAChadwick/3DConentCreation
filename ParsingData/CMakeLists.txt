@@ -20,6 +20,9 @@ set(SOURCE_CODE
 	renderer.h
 	FileIntoString.h
 	LevelDataParser.h
+	h2bParser.h
+	ObjectData.h
+	
 )
 
 if(WIN32)

@@ -18,8 +18,10 @@ public:
 	struct Light
 	{
 		int type;
+		float falloff;
+		float padding[2] = { 1, 1 };
 		GW::MATH::GQUATERNIONF rotation;
-		GW::MATH::GMATRIXF position;
+		GW::MATH::GVECTORF position;
 		GW::MATH::GVECTORF color = { 0.75, 0.75, 0.75, 1 };
 	};
 
@@ -80,6 +82,7 @@ public:
 				ReadStreamIntoMatrix(newMesh.world, dataParser, data);
 				
 				// Add mesh to parsed meshes
+				std::cout << "Added Mesh #" << meshes.size() << std::endl;
 				meshes.push_back(newMesh);
 			}
 			else if ((data.compare("LIGHT") == 0))
@@ -96,7 +99,9 @@ public:
 				}
 
 				// Parse matrix
-				ReadStreamIntoMatrix(newLight.position, dataParser, data);
+				GW::MATH::GMATRIXF temp;
+				ReadStreamIntoMatrix(temp, dataParser, data);
+				newLight.position = temp.row4;
 
 				// Parse Light data
 				ReadStreamIntoLight(dataParser, data, newLight);
@@ -115,7 +120,12 @@ public:
 				// Trash last bit of ;ine from parsing
 				std::getline(dataParser, data, '\n');
 
+				// Get light attenuation data
+				newLight.falloff = std::stof(data);
+
 				// Push into light vector
+
+				std::cout << "Added light #" << lights.size() << std::endl;
 				lights.push_back(newLight);
 
 			}
@@ -191,9 +201,9 @@ public:
 			// Get color line for lights
 			std::getline(stream, data, '\n');
 
-			if (data.compare("POINT") == 0)
+			if (data.compare("SUN") == 0)
 				newLight.type = 0;
-			else if (data.compare("AREA") == 0)
+			else if (data.compare("POINT") == 0)
 				newLight.type = 1;
 			else if (data.compare("SPOT") == 0)
 				newLight.type = 2;

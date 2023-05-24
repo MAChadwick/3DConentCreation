@@ -18,9 +18,7 @@ void PrintLabeledDebugString(const char* label, const char* toPrint)
 // Globally shared scene data that is only needed once per scene
 struct SceneData
 {
-	GW::MATH::GQUATERNIONF lightRotation;
-	GW::MATH::GVECTORF lightPosition;
-	GW::MATH::GVECTORF lightColor;
+	LevelDataParser::Light light;
 	GW::MATH::GVECTORF cameraPos;
 	GW::MATH::GMATRIXF viewMatrix, projectionMatrix;
 };
@@ -36,7 +34,6 @@ struct MeshData
 // Creation, Rendering & Cleanup
 class Renderer
 {
-
 	// proxy handles
 	GW::SYSTEM::GWindow win;
 	GW::GRAPHICS::GDirectX11Surface d3d;
@@ -83,6 +80,7 @@ class Renderer
 public:
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GDirectX11Surface _d3d)
 	{
+
 		// Parse level data from GameLevel.txt
 		lParse.ParseGameData("../GameLevel.txt");
 
@@ -110,6 +108,7 @@ public:
 			}
 		}
 
+
 		win = _win;
 		d3d = _d3d;
 
@@ -129,7 +128,7 @@ public:
 
 		LevelDataParser::Light newLight = lParse.lights[0];
 
-		sceneData = { newLight.rotation, newLight.position.row4, newLight.color, lParse.camera.world.row4, viewMatrix, projectionMatrix };
+		sceneData = { newLight, lParse.camera.world.row4, viewMatrix, projectionMatrix };
 		meshData.worldMatrix = worldMatrix;
 
 		// Create input proxies
@@ -359,16 +358,6 @@ public:
 		float indexOffset = 0;
 
 		// Render lighting first
-		for (int i = 0; i < lParse.lights.size(); i++)
-		{
-			sceneData.lightColor = lParse.lights[i].color;
-			sceneData.lightPosition = lParse.lights[i].position.row4;
-			sceneData.lightRotation = lParse.lights[i].rotation;
-			// ViewMatrix and CameraPos is updated in UpdateCamera
-
-			MapSceneBufferData(curHandles);
-			curHandles.context->Draw(0, 0);
-		}
 
 		for (int i = 0; i < objectData.size(); i++)
 		{
@@ -382,6 +371,16 @@ public:
 				MapMeshBufferMaterial(curHandles, objectData[i].objectMaterials.at(objectData[i].objectMeshes[x].materialIndex));
 				curHandles.context->DrawIndexed(objectData[i].objectMeshes[x].drawInfo.indexCount, objectData[i].objectMeshes[x].drawInfo.indexOffset, 0);
 			}
+
+			for (int x = 0; x < lParse.lights.size(); x++)
+			{
+				sceneData.light = lParse.lights[x];
+				// ViewMatrix and CameraPos is updated in UpdateCamera
+
+				MapSceneBufferData(curHandles);
+				curHandles.context->Draw(0, 0);
+			}
+
 		}
 
 		ReleasePipelineHandles(curHandles);
@@ -470,7 +469,6 @@ public:
 		matrixMath.InverseF(temp, viewMatrix);
 
 		sceneData.viewMatrix = viewMatrix;
-		sceneData.cameraPos = viewMatrix.row4;
 	}
 
 private:
