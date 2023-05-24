@@ -81,6 +81,8 @@ public:
 
 				// Parse matrix here
 				ReadStreamIntoMatrix(newMesh.world, dataParser, data);
+
+				// Parse bounding box data
 				
 				// Add mesh to parsed meshes
 				std::cout << "Added Mesh #" << meshes.size() << std::endl;
@@ -194,6 +196,16 @@ public:
 
 				// Trash last '>' left over from data parsing
 				std::getline(stream, data, '\n');
+			}
+		}
+
+		void ReadStreamIntoBoundingBox(std::ifstream& stream, std::string& data, Mesh& newMesh)
+		{
+			int dataIndex = 0;
+
+			for (int i = 0; i < 8; i++)
+			{
+
 			}
 		}
 
