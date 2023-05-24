@@ -12,6 +12,7 @@ public:
 	struct Mesh
 	{
 		GW::MATH::GMATRIXF world = GW::MATH::GIdentityMatrixF;
+		GW::MATH::GVECTORF bounding[8];
 		std::string meshModel = "";
 	};
 

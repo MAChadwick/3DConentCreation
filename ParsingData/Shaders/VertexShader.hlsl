@@ -44,7 +44,7 @@ struct OutputToRasterizer
 
 cbuffer SceneData : register(b1)
 {
-	Light light;
+	Light light[2];
 	float4 cameraPos;
 	float4x4 viewMatrix, projectionMatrix;
 };

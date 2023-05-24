@@ -18,7 +18,7 @@ void PrintLabeledDebugString(const char* label, const char* toPrint)
 // Globally shared scene data that is only needed once per scene
 struct SceneData
 {
-	LevelDataParser::Light light;
+	LevelDataParser::Light lights[2];
 	GW::MATH::GVECTORF cameraPos;
 	GW::MATH::GMATRIXF viewMatrix, projectionMatrix;
 };
@@ -126,9 +126,13 @@ public:
 
 		projectionMatrix = InitialzieProjectionMatrix(projectionMatrix, 65.0f, 0.1f, 100.0f);
 
-		LevelDataParser::Light newLight = lParse.lights[0];
+		sceneData = { {}, lParse.camera.world.row4, viewMatrix, projectionMatrix };
 
-		sceneData = { newLight, lParse.camera.world.row4, viewMatrix, projectionMatrix };
+		for (int i = 0; i < lParse.lights.size(); i++)
+		{
+			sceneData.lights[i] = lParse.lights[i];
+		}
+
 		meshData.worldMatrix = worldMatrix;
 
 		// Create input proxies
@@ -357,7 +361,9 @@ public:
 		float indexCount = 0;
 		float indexOffset = 0;
 
-		// Render lighting first
+		// Disable lighting temporarilly
+		//sceneData.lights[0].type = 99;
+		MapSceneBufferData(curHandles);
 
 		for (int i = 0; i < objectData.size(); i++)
 		{
@@ -369,16 +375,8 @@ public:
 			for (int x = 0; x < objectData[i].objectMeshes.size(); x++)
 			{
 				MapMeshBufferMaterial(curHandles, objectData[i].objectMaterials.at(objectData[i].objectMeshes[x].materialIndex));
+				
 				curHandles.context->DrawIndexed(objectData[i].objectMeshes[x].drawInfo.indexCount, objectData[i].objectMeshes[x].drawInfo.indexOffset, 0);
-			}
-
-			for (int x = 0; x < lParse.lights.size(); x++)
-			{
-				sceneData.light = lParse.lights[x];
-				// ViewMatrix and CameraPos is updated in UpdateCamera
-
-				MapSceneBufferData(curHandles);
-				curHandles.context->Draw(0, 0);
 			}
 
 		}
