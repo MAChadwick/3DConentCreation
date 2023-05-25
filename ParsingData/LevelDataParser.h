@@ -83,7 +83,8 @@ public:
 				ReadStreamIntoMatrix(newMesh.world, dataParser, data);
 
 				// Parse bounding box data
-				
+				ReadStreamIntoBoundingBox(dataParser, data, newMesh);
+
 				// Add mesh to parsed meshes
 				std::cout << "Added Mesh #" << meshes.size() << std::endl;
 				meshes.push_back(newMesh);
@@ -213,13 +214,11 @@ public:
 				newMesh.bounding[i].data[0] = std::stof(temp);
 
 				data = data.substr(data.find_first_of(',') + 1);
-				temp = data.substr(0, data.find_first_of(',') + 1);
+				temp = data.substr(0, data.find_first_of(','));
 				newMesh.bounding[i].data[1] = std::stof(temp);
 
 				data = data.substr(data.find_first_of(',') + 1);
 				newMesh.bounding[i].data[2] = std::stof(data);
-
-				std::getline(stream, data, '\n');
 			}
 		}
 
