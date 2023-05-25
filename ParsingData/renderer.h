@@ -384,6 +384,11 @@ public:
 		ReleasePipelineHandles(curHandles);
 	}
 
+	float Lerp(float a, float b, float r)
+	{
+		return a + (b - a) * r;
+	}
+
 	void UpdateCamera()
 	{
 		static std::chrono::steady_clock::time_point last;
@@ -418,7 +423,6 @@ public:
 		if (mouseInputs[2] >= -1 && mouseInputs[2] <= 1) mouseInputs[2] = 0;
 		if (mouseInputs[3] >= -1 && mouseInputs[3] <= 1) mouseInputs[3] = 0;
 
-
 		controller.GetState(controller, 7, controllerInputs[0]); // rt
 		controller.GetState(controller, 6, controllerInputs[1]); // lt
 		controller.GetState(controller, 16, controllerInputs[2]); // lsx
@@ -438,7 +442,7 @@ public:
 		totalZChange = (keyboardInputs[2] - keyboardInputs[4]) + controllerInputs[3];
 		totalPitchChange = (65.0f * (mouseInputs[3] / 600.0f) + (controllerInputs[5] * thumbstickSpeed));
 		totalYawChange = (65.0f * aspectRatio * (mouseInputs[2] / 800.0f) + controllerInputs[4] * thumbstickSpeed);
-
+		
 		// Translate camera based on inputs
 		matrixMath.TranslateLocalF(temp, GW::MATH::GVECTORF{ totalXChange * perFrameSpeed, totalYChange * perFrameSpeed, totalZChange * perFrameSpeed, 0 }, temp);
 
@@ -459,6 +463,52 @@ public:
 		temp.row4.y = tempPos.y;
 		temp.row4.z = tempPos.z;
 		temp.row4.w = tempPos.w;
+
+		// Determine if we apply the movement changes based on the new position
+		// Calculate bounding box of camera
+		float boundWidth = 0.25f;
+		float boundHeight = 0.25f;
+		float boundDepth = 0.25f;
+
+		GW::MATH::GVECTORF maxAxis = { temp.row4.x + boundWidth, temp.row4.y + boundHeight, temp.row4.z + boundDepth, 1 };
+		GW::MATH::GVECTORF minAxis = { temp.row4.x - boundWidth, temp.row4.y - boundHeight, temp.row4.z - boundDepth, 1 };
+
+
+		// Check for collisions with other bounding boxes
+		float precision = 1;	// The higher the precision value, the more precise collision detection will be, but performance will decrease
+								// Must be at least 0.1
+
+		for (int x = 0; x < lParse.meshes.size(); x++)
+		{
+			if (lParse.meshes[x].enableCollisions == false) continue;
+
+			float currX = minAxis.x;
+			float currY = minAxis.y;
+			float currZ = minAxis.z;
+
+			for (int i = 0; i < precision * 10; i++)
+			{
+				float ratio = (float)i / (precision * 10.0f);
+
+				currX = Lerp(maxAxis.x, minAxis.x, ratio);
+				currY = Lerp(maxAxis.y, minAxis.y, ratio);
+				currZ = Lerp(maxAxis.z, minAxis.z, ratio);
+
+				// Check current position against bounding box of meshes
+				if (currX <= lParse.meshes[x].maxAxis.x && currX >= lParse.meshes[x].minAxis.x &&
+				    currY <= lParse.meshes[x].maxAxis.y && currY >= lParse.meshes[x].minAxis.y &&
+					currZ <= lParse.meshes[x].maxAxis.z && currZ >= lParse.meshes[x].minAxis.z) 
+				{
+					std::cout << "Collide with " << lParse.meshes[x].meshModel << " at: " << currX << ", " << currY << ", " << currZ << std::endl;
+					std::cout << "Mesh Max/Min: " << lParse.meshes[x].maxAxis.x << "/" << lParse.meshes[x].minAxis.x << std::endl;
+					std::cout << "Mesh Max/Min: " << lParse.meshes[x].maxAxis.y << "/" << lParse.meshes[x].minAxis.y << std::endl;
+					std::cout << "Mesh Max/Min: " << lParse.meshes[x].maxAxis.z << "/" << lParse.meshes[x].minAxis.z << std::endl;
+					return;
+				};
+			}
+
+			currX = currX;
+		}
 
 		// Set CameraPos in SceneData
 		sceneData.cameraPos = tempPos;

@@ -11,7 +11,10 @@ public:
 
 	struct Mesh
 	{
+		bool enableCollisions = false;
 		GW::MATH::GMATRIXF world = GW::MATH::GIdentityMatrixF;
+		GW::MATH::GVECTORF maxAxis = { -9999, -9999, -9999, 1 };
+		GW::MATH::GVECTORF minAxis = { 9999, 9999, 9999, 1 };
 		GW::MATH::GVECTORF bounding[8];
 		std::string meshModel = "";
 	};
@@ -66,6 +69,10 @@ public:
 			{
 				Mesh newMesh;
 
+				// Collisions enabled bool
+				std::getline(dataParser, data, '\n');
+				if (data.compare("True") == 0) newMesh.enableCollisions = true;
+
 				// Mesh Name
 				std::getline(dataParser, newMesh.meshModel, '\n');
 
@@ -86,14 +93,16 @@ public:
 				ReadStreamIntoBoundingBox(dataParser, data, newMesh);
 
 				// Add mesh to parsed meshes
-				std::cout << "Added Mesh #" << meshes.size() << std::endl;
 				meshes.push_back(newMesh);
 			}
 			else if ((data.compare("LIGHT") == 0))
 			{
 				Light newLight;
 
-				// Trash line for now
+				// Trash collisions line
+				std::getline(dataParser, data, '\n');
+
+				// Trash light name
 				std::getline(dataParser, data, '\n');
 
 				// Drop number for duplicate lights - Also trash for now
@@ -170,6 +179,7 @@ public:
 			// Parse matrix data into matrix
 			for (int i = 0; i < 4; i++)
 			{
+
 				// Remove starting matrix text, '(',')', '<', '>'
 				std::getline(stream, data, ')');
 				data = data.substr(data.find_first_of('(') + 1);
@@ -204,11 +214,11 @@ public:
 		{
 			int dataIndex = 0;
 
+
 			for (int i = 0; i < 8; i++)
 			{
 
 				std::getline(stream, data, '\n');
-
 
 				std::string temp = data.substr(0, data.find_first_of(','));
 				newMesh.bounding[i].data[0] = std::stof(temp);
@@ -219,6 +229,17 @@ public:
 
 				data = data.substr(data.find_first_of(',') + 1);
 				newMesh.bounding[i].data[2] = std::stof(data);
+				newMesh.bounding[i].data[3] = 1;
+
+				GW::MATH::GVector::VectorXMatrixF(newMesh.bounding[i], newMesh.world, newMesh.bounding[i]);
+
+				// Easier to calculate bounding box with min/max values
+				if (newMesh.bounding[i].x > newMesh.maxAxis.x) newMesh.maxAxis.x = newMesh.bounding[i].x;
+				if (newMesh.bounding[i].x < newMesh.minAxis.x) newMesh.minAxis.x = newMesh.bounding[i].x;
+				if (newMesh.bounding[i].y > newMesh.maxAxis.y) newMesh.maxAxis.y = newMesh.bounding[i].y;
+				if (newMesh.bounding[i].y < newMesh.minAxis.y) newMesh.minAxis.y = newMesh.bounding[i].y;
+				if (newMesh.bounding[i].z > newMesh.maxAxis.z) newMesh.maxAxis.z = newMesh.bounding[i].z;
+				if (newMesh.bounding[i].z < newMesh.minAxis.z) newMesh.minAxis.z = newMesh.bounding[i].z;
 			}
 		}
 
